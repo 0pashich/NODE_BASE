@@ -1,0 +1,23 @@
+{
+  "name": "node_base",
+  "version": "1.0.0",
+  "description": "NODE_BASE",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0pashich/NODE_BASE.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/0pashich/NODE_BASE/issues"
+  },
+  "homepage": "https://github.com/0pashich/NODE_BASE#readme",
+  "dependencies": {
+    "colors": "^1.4.0"
+  }
+}
