@@ -7,6 +7,9 @@
     "dev": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "reader": "index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/0pashich/NODE_BASE.git"
@@ -18,6 +21,9 @@
   },
   "homepage": "https://github.com/0pashich/NODE_BASE#readme",
   "dependencies": {
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "inquirer": "^8.2.0",
+    "inquirer-file-tree-selection-prompt": "^1.0.13",
+    "yargs": "^17.3.0"
   }
 }
