@@ -1,63 +1,43 @@
-#!/usr/bin/env node
-const http = require("http");
-const fs = require('fs');
-const url = require('url');
+const socket = require('socket.io');
+const http = require('http');
 const path = require('path');
+const fs = require('fs');
 
-
-const host = 'localhost';
-const port = 8000;
-const dir = process.cwd();
-
-
-const isDir = (filename) => fs.lstatSync(filename).isDirectory();
-const fileList = (dir) => {
-    return ['../', ...fs.readdirSync(dir, { withFileTypes: true }).map(file => file.isDirectory() ? file.name + '/' : file.name)];
-}
-
-const requestListener = (req, res) => {
-    if (req.method === 'GET') {
-        try {
-            const { pathname } = url.parse(req.url, false);
-            if (isDir('.' + pathname)) {
-                const filenames = fileList('.' + pathname);
-                res.writeHead(200, {
-                    'Content-Type': 'text/html',
-                });
-                res.write(`<!DOCTYPE html>
-                            <html lang="en">
-                            <head>
-                                <meta charset="UTF-8">
-                                <title>Hello Node JS</title>
-                            </head>
-                            <body>
-                            <h1>${pathname}</h1>`);
-                filenames.forEach(file => {
-                    res.write(`<a href="${pathname}${file}">${file}</a></br>`);
-                });
-                res.write(`</body>
-                           </html>`);
-                res.end();
-            } else {
-                const readStream = fs.createReadStream('.' + pathname);
-                res.writeHead(200);
-                readStream.pipe(res);
-            }
-        } catch (error) {
-            console.log(error);
-            res.writeHead(500);
-            res.end('Internal server error');
-        }
-    } else {
-        res.writeHead(405);
-        res.end('HTTP method not allowed');
-    }
-
-}
-
-const server = http.createServer(requestListener);
-
-server.listen(port, host, () => {
-    console.log(`Server is running on http://${host}:${port}`);
+const server = http.createServer((req, res) => {
+    const indexPath = path.join(__dirname, 'index.html');
+    const readStream = fs.createReadStream(indexPath);
+    readStream.pipe(res);
 });
 
+const getRandomInt = (max) => Math.floor(Math.random() * max);
+
+const io = socket(server);
+
+io.on('connection', (client) => {
+    io.emit('user-count', { userCount: io.engine.clientsCount })
+
+    client.data.username = "user" + getRandomInt(1000);
+    client.emit('service-msg', { message: `You connected, your name ${client.data.username}` });
+    client.broadcast.emit('service-msg', { message: `The new client ${client.data.username} connected` });
+
+    client.on("disconnect", (reason) => {
+        client.broadcast.emit('service-msg', { message: `The client ${client.data.username} diconnected` });
+        io.emit('user-count', { userCount: io.engine.clientsCount })
+    });
+
+
+
+    client.on('client-msg', data => {
+        console.log(data);
+
+        const payload = {
+            message: data.message.split('').reverse().join(''),
+            user: client.data.username,
+        };
+
+        client.broadcast.emit('server-msg', payload);
+        client.emit('server-msg', payload);
+    });
+});
+
+server.listen(5555);

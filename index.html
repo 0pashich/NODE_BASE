@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Socket</title>
+    <script src="https://cdn.socket.io/4.2.0/socket.io.min.js"
+        integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <input id="input" type="text" autofocus>
+    <button id="button">Send</button>
+    <div id="count"></div>
+    <div id="messages"></div>
+    <script>
+        const socket = io('localhost:5555');
+        const messageBlock = document.querySelector('#messages');
+        const sendButton = document.querySelector('#button');
+        const input = document.querySelector('#input');
+        const userCount = document.querySelector('#count');
+
+
+        sendButton.addEventListener('click', () => {
+            const data = {
+                message: input.value,
+            };
+
+            socket.emit('client-msg', data);
+            input.value = '';
+        });
+
+
+        socket.on('user-count', (payload) => {
+            console.log('User count =', payload.userCount);
+            userCount.innerHTML = `Всего пользователей: ${payload.userCount}`;
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected!');
+        });
+
+        socket.on('service-msg', payload => {
+            console.log(payload);
+            messageBlock.insertAdjacentHTML('beforeend', `<div>${payload.message}</div>`)
+        });
+        
+        socket.on('server-msg', payload => {
+            console.log(payload);
+            messageBlock.insertAdjacentHTML('beforeend', `<div><b>${payload.user} :</b>${payload.message}</div>`)
+        });
+    </script>
+</body>
+
+</html>
